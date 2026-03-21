@@ -1,0 +1,70 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="SaveSync.Views.AddGameDialog"
+        Title="Add New Game"
+        Width="460"
+        SizeToContent="Height"
+        CanResize="False"
+        ShowInTaskbar="False"
+        WindowStartupLocation="CenterOwner">
+
+    <Grid RowDefinitions="Auto,*,Auto">
+
+        <!-- Header -->
+        <Border Grid.Row="0" Background="#2C3E50" Padding="16,12">
+            <StackPanel Orientation="Horizontal" Spacing="10">
+                <TextBlock Text="🎮" FontSize="16" Foreground="White" VerticalAlignment="Center"/>
+                <TextBlock Text="Add New Game"
+                           FontSize="14" FontWeight="SemiBold"
+                           Foreground="White"
+                           VerticalAlignment="Center"/>
+            </StackPanel>
+        </Border>
+
+        <!-- Form body -->
+        <Border Grid.Row="1" Padding="20,16">
+            <StackPanel Spacing="12">
+                <StackPanel Spacing="4">
+                    <TextBlock Text="Game Name" FontWeight="SemiBold" Foreground="#2C3E50"/>
+                    <TextBox x:Name="GameNameBox" Watermark="e.g. The Witcher 3"/>
+                </StackPanel>
+                <StackPanel Spacing="4">
+                    <TextBlock Text="Save Directory Path" FontWeight="SemiBold" Foreground="#2C3E50"/>
+                    <Grid ColumnDefinitions="*,Auto">
+                        <TextBox Grid.Column="0"
+                                 x:Name="SavePathBox"
+                                 Watermark="Path to game save folder"
+                                 Margin="0,0,8,0"/>
+                        <Button Grid.Column="1"
+                                Content="Browse..."
+                                Click="BrowseSavePathButton_Click"
+                                Padding="12,6"
+                                Background="#3498DB"
+                                Foreground="White"/>
+                    </Grid>
+                </StackPanel>
+                <TextBlock x:Name="ErrorText"
+                           Foreground="#E74C3C"
+                           FontSize="11"
+                           IsVisible="False"
+                           TextWrapping="Wrap"/>
+            </StackPanel>
+        </Border>
+
+        <!-- Buttons -->
+        <Border Grid.Row="2" Padding="16,10">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8">
+                <Button Content="Cancel"
+                        Click="Cancel_Click"
+                        Padding="20,8"
+                        Background="#828282"/>
+                <Button Content="Add Game"
+                        Background="#27AE60"
+                        Foreground="White"
+                        Click="AddGame_Click"
+                        Padding="20,8"/>
+            </StackPanel>
+        </Border>
+
+    </Grid>
+</Window>

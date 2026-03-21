@@ -1,6 +1,5 @@
 using Avalonia.Controls;
 using Avalonia.Interactivity;
-using Avalonia.Platform.Storage;
 using SaveSync.Services;
 using SaveSync.ViewModels;
 using System.Threading.Tasks;
@@ -19,20 +18,19 @@ public partial class MainWindow : Window
         };
     }
 
-    private async void BrowseSavePathButton_Click(object? sender, RoutedEventArgs e)
+    private async void AddGameButton_Click(object? sender, RoutedEventArgs e)
     {
         var viewModel = DataContext as MainWindowViewModel;
         if (viewModel == null) return;
 
-        var folders = await StorageProvider.OpenFolderPickerAsync(new FolderPickerOpenOptions
-        {
-            Title = "Select Game Save Directory",
-            AllowMultiple = false
-        });
+        var dialog = new AddGameDialog();
+        var result = await dialog.ShowDialog<(string Name, string Path)?>(this);
 
-        if (folders.Count > 0)
+        if (result is { } game)
         {
-            viewModel.NewGameSavePath = folders[0].Path.LocalPath;
+            viewModel.NewGameName = game.Name;
+            viewModel.NewGameSavePath = game.Path;
+            viewModel.AddGameCommand.Execute(null);
         }
     }
 
