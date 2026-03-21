@@ -24,12 +24,14 @@ public partial class MainWindow : Window
         if (viewModel == null) return;
 
         var dialog = new AddGameDialog();
-        var result = await dialog.ShowDialog<(string Name, string Path)?>(this);
+        var result = await dialog.ShowDialog<(string Name, string Path, int? IgdbId, string? CoverImageId)?>(this);
 
         if (result is { } game)
         {
             viewModel.NewGameName = game.Name;
             viewModel.NewGameSavePath = game.Path;
+            viewModel.NewGameIgdbId = game.IgdbId;
+            viewModel.NewGameIgdbCoverImageId = game.CoverImageId;
             viewModel.AddGameCommand.Execute(null);
         }
     }

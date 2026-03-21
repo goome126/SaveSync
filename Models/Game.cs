@@ -11,4 +11,8 @@ public class Game
     public string Name { get; set; } = string.Empty;
     public string SavePath { get; set; } = string.Empty;
     public DateTime LastSynced { get; set; }
+    /// <summary>IGDB game id, populated when the game was found via IGDB search.</summary>
+    public int? IgdbId { get; set; }
+    /// <summary>IGDB cover image_id string, used to load/cache box art.</summary>
+    public string? IgdbCoverImageId { get; set; }
 }
