@@ -47,8 +47,37 @@ public class SyncService
         {
             var game = games[i];
             progress?.Report((i + 1, games.Count, game.Name));
-            
+
             await SyncGameAsync(game);
+        }
+
+        return true;
+    }
+
+    public async Task<bool> RestoreGameAsync(Game game, IProgress<int>? progress = null)
+    {
+        if (!_cloudProvider.IsAuthenticated)
+            throw new InvalidOperationException("Cloud provider not authenticated");
+
+        var config = _configService.LoadConfig();
+        var cloudPath = $"{config.CloudDestinationFolder}/{game.Name}".Replace('\\', '/');
+
+        await _cloudProvider.DownloadDirectoryAsync(cloudPath, game.SavePath, progress);
+
+        return true;
+    }
+
+    public async Task<bool> RestoreAllGamesAsync(IProgress<(int current, int total, string gameName)>? progress = null)
+    {
+        var config = _configService.LoadConfig();
+        var games = config.Games;
+
+        for (int i = 0; i < games.Count; i++)
+        {
+            var game = games[i];
+            progress?.Report((i + 1, games.Count, game.Name));
+
+            await RestoreGameAsync(game);
         }
 
         return true;

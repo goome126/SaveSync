@@ -1,0 +1,47 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="SaveSync.Views.ConfirmationDialog"
+        Title="Warning"
+        Width="460"
+        SizeToContent="Height"
+        CanResize="False"
+        ShowInTaskbar="False"
+        WindowStartupLocation="CenterOwner">
+
+    <Grid RowDefinitions="Auto,Auto,Auto">
+
+        <!-- Warning header -->
+        <Border Grid.Row="0" Background="#E74C3C" Padding="16,12">
+            <StackPanel Orientation="Horizontal" Spacing="10">
+                <TextBlock Text="⚠" FontSize="16" Foreground="White" VerticalAlignment="Center"/>
+                <TextBlock x:Name="TitleText"
+                           FontSize="14" FontWeight="SemiBold"
+                           Foreground="White"
+                           VerticalAlignment="Center"/>
+            </StackPanel>
+        </Border>
+
+        <!-- Message body -->
+        <Border Grid.Row="1" Padding="20,16">
+            <TextBlock x:Name="MessageText"
+                       TextWrapping="Wrap"
+                       Foreground="#2C3E50"
+                       LineHeight="20"/>
+        </Border>
+
+        <!-- Buttons -->
+        <Border Grid.Row="2" Background="#ECF0F1" Padding="16,10">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8">
+                <Button Content="Cancel"
+                        Click="Cancel_Click"
+                        Padding="20,8"/>
+                <Button Content="Proceed Anyway"
+                        Background="#E74C3C"
+                        Foreground="White"
+                        Click="Proceed_Click"
+                        Padding="20,8"/>
+            </StackPanel>
+        </Border>
+
+    </Grid>
+</Window>

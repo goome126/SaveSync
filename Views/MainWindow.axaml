@@ -167,13 +167,33 @@
                                 FontSize="14"
                                 FontWeight="SemiBold"/>
 
+                        <Separator Margin="0,4"/>
+
+                        <Button Content="Restore Selected Game" 
+                                Command="{Binding RestoreSelectedGameCommand}"
+                                Background="#8E44AD"
+                                Foreground="White"
+                                HorizontalAlignment="Stretch"
+                                Padding="0,12"
+                                FontSize="14"
+                                FontWeight="SemiBold"/>
+
+                        <Button Content="Restore All Games" 
+                                Command="{Binding RestoreAllGamesCommand}"
+                                Background="#6C3483"
+                                Foreground="White"
+                                HorizontalAlignment="Stretch"
+                                Padding="0,12"
+                                FontSize="14"
+                                FontWeight="SemiBold"/>
+
                         <!-- Progress -->
                         <Border Background="#ECF0F1" 
                                 Padding="12" 
                                 CornerRadius="6"
-                                IsVisible="{Binding IsSyncing}">
+                                IsVisible="{Binding IsWorking}">
                             <StackPanel Spacing="8">
-                                <TextBlock Text="Syncing..." FontWeight="SemiBold" Foreground="#2C3E50"/>
+                                <TextBlock Text="{Binding StatusMessage}" FontWeight="SemiBold" Foreground="#2C3E50" TextWrapping="Wrap"/>
                                 <ProgressBar Value="{Binding SyncProgress}" 
                                              Maximum="100"
                                              Height="8"
