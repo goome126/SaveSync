@@ -38,6 +38,8 @@ public partial class MainWindowViewModel : ViewModelBase
     private string _statusMessage = "Ready";
 
     [ObservableProperty]
+    [NotifyCanExecuteChangedFor(nameof(SyncSelectedGameCommand))]
+    [NotifyCanExecuteChangedFor(nameof(SyncAllGamesCommand))]
     private bool _isSyncing;
 
     [ObservableProperty]
@@ -95,21 +97,27 @@ public partial class MainWindowViewModel : ViewModelBase
     [RelayCommand]
     private void RemoveGame()
     {
-        if (SelectedGame == null)
+        var gameToRemove = SelectedGame;
+        if (gameToRemove == null)
         {
             StatusMessage = "Please select a game to remove";
             return;
         }
 
-        var gameName = SelectedGame.Name;
-        Games.Remove(SelectedGame);
+        var gameName = gameToRemove.Name;
+        Games.Remove(gameToRemove);
 
         var config = _configService.LoadConfig();
-        config.Games.RemoveAll(g => g.Id == SelectedGame.Id);
+        var removedCount = config.Games.RemoveAll(g =>
+            (!string.IsNullOrWhiteSpace(gameToRemove.Id) && g.Id == gameToRemove.Id) ||
+            (string.IsNullOrWhiteSpace(gameToRemove.Id) && g.Name == gameToRemove.Name && g.SavePath == gameToRemove.SavePath));
+
         _configService.SaveConfig(config);
 
         SelectedGame = null;
-        StatusMessage = $"Removed {gameName} from library";
+        StatusMessage = removedCount > 0
+            ? $"Removed {gameName} from library"
+            : $"Removed {gameName} from list, but no matching config entry was found";
     }
 
     [RelayCommand]
@@ -148,7 +156,7 @@ public partial class MainWindowViewModel : ViewModelBase
         StatusMessage = $"Cloud destination set to: {CloudDestinationFolder}";
     }
 
-    [RelayCommand(CanExecute = nameof(CanSyncSelectedGame))]
+    [RelayCommand(CanExecute = nameof(CanRunSyncCommands))]
     private async Task SyncSelectedGame()
     {
         if (SelectedGame == null) return;
@@ -181,9 +189,7 @@ public partial class MainWindowViewModel : ViewModelBase
         }
     }
 
-    private bool CanSyncSelectedGame() => SelectedGame != null && !IsSyncing;
-
-    [RelayCommand(CanExecute = nameof(CanSyncAllGames))]
+    [RelayCommand(CanExecute = nameof(CanRunSyncCommands))]
     private async Task SyncAllGames()
     {
         if (!IsGoogleDriveConnected)
@@ -225,5 +231,5 @@ public partial class MainWindowViewModel : ViewModelBase
         }
     }
 
-    private bool CanSyncAllGames() => Games.Count > 0 && !IsSyncing;
+    private bool CanRunSyncCommands() => !IsSyncing;
 }
