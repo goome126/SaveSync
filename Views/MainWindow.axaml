@@ -1,0 +1,226 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:SaveSync.ViewModels"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="1000" d:DesignHeight="650"
+        x:Class="SaveSync.Views.MainWindow"
+        x:DataType="vm:MainWindowViewModel"
+        Icon="/Assets/avalonia-logo.ico"
+        Title="SaveSync - Game Save Backup Manager"
+        Width="1000" Height="650"
+        MinWidth="800" MinHeight="500">
+
+    <Design.DataContext>
+        <vm:MainWindowViewModel/>
+    </Design.DataContext>
+
+    <Grid Margin="16" RowDefinitions="Auto,*,Auto">
+
+        <!-- Header -->
+        <Border Grid.Row="0" Background="#2C3E50" Padding="16,12" CornerRadius="6" Margin="0,0,0,16">
+            <Grid ColumnDefinitions="*,Auto">
+                <StackPanel>
+                    <TextBlock Text="SaveSync" FontSize="24" FontWeight="Bold" Foreground="White"/>
+                    <TextBlock Text="Backup and sync your game saves to the cloud" FontSize="12" Foreground="#BDC3C7"/>
+                </StackPanel>
+                <StackPanel Grid.Column="1" Spacing="8" Orientation="Horizontal">
+                    <Button Content="Connect Google Drive" 
+                            Command="{Binding ConnectGoogleDriveCommand}"
+                            IsVisible="{Binding !IsGoogleDriveConnected}"
+                            Background="#27AE60"
+                            Foreground="White"
+                            Padding="16,8"/>
+                    <Button Content="Disconnect" 
+                            Command="{Binding DisconnectGoogleDriveCommand}"
+                            IsVisible="{Binding IsGoogleDriveConnected}"
+                            Background="#E74C3C"
+                            Foreground="White"
+                            Padding="16,8"/>
+                    <Border Background="#27AE60" 
+                            Padding="12,8" 
+                            CornerRadius="4"
+                            IsVisible="{Binding IsGoogleDriveConnected}">
+                        <TextBlock Text="✓ Google Drive Connected" Foreground="White" FontWeight="SemiBold"/>
+                    </Border>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- Main Content -->
+        <Grid Grid.Row="1" ColumnDefinitions="2*,*">
+
+            <!-- Left Panel - Game Library -->
+            <Border Grid.Column="0" BorderBrush="#BDC3C7" BorderThickness="1" CornerRadius="6" Padding="16" Margin="0,0,8,0">
+                <Grid RowDefinitions="Auto,Auto,*,Auto">
+
+                    <!-- Title -->
+                    <TextBlock Grid.Row="0" Text="Game Library" FontSize="18" FontWeight="SemiBold" Margin="0,0,0,12"/>
+
+                    <!-- Add Game Section -->
+                    <Border Grid.Row="1" Background="#ECF0F1" Padding="12" CornerRadius="6" Margin="0,0,0,12">
+                        <StackPanel Spacing="8">
+                            <TextBlock Text="Add New Game" FontWeight="SemiBold" Foreground="#2C3E50"/>
+                            <TextBox Watermark="Game Name" Text="{Binding NewGameName}"/>
+                            <Grid ColumnDefinitions="*,Auto">
+                                <TextBox Grid.Column="0" 
+                                         Watermark="Save Directory Path" 
+                                         Text="{Binding NewGameSavePath}"
+                                         Margin="0,0,8,0"/>
+                                <Button Grid.Column="1" 
+                                        Content="Browse..." 
+                                        Click="BrowseSavePathButton_Click"
+                                        Padding="12,6"/>
+                            </Grid>
+                            <Button Content="Add Game" 
+                                    Command="{Binding AddGameCommand}"
+                                    Background="#3498DB"
+                                    Foreground="White"
+                                    HorizontalAlignment="Stretch"
+                                    Padding="0,8"/>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Game List -->
+                    <ListBox Grid.Row="2" 
+                             ItemsSource="{Binding Games}"
+                             SelectedItem="{Binding SelectedGame}"
+                             Background="White"
+                             BorderBrush="#BDC3C7"
+                             BorderThickness="1"
+                             CornerRadius="6">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <Border Padding="8" Margin="4">
+                                    <StackPanel>
+                                        <TextBlock Text="{Binding Name}" FontWeight="SemiBold" FontSize="14"/>
+                                        <TextBlock Text="{Binding SavePath}" FontSize="11" Foreground="#7F8C8D" TextWrapping="Wrap"/>
+                                        <TextBlock FontSize="11" Foreground="#5D6D7E">
+                                            <Run Text="Last synced: "/>
+                                            <Run Text="{Binding LastSynced, StringFormat='{}{0:g}', FallbackValue='Never'}"/>
+                                        </TextBlock>
+                                    </StackPanel>
+                                </Border>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+
+                    <!-- Remove Button -->
+                    <Button Grid.Row="3" 
+                            Content="Remove Selected Game" 
+                            Command="{Binding RemoveGameCommand}"
+                            Background="#E74C3C"
+                            Foreground="White"
+                            HorizontalAlignment="Stretch"
+                            Margin="0,12,0,0"
+                            Padding="0,8"/>
+                </Grid>
+            </Border>
+
+            <!-- Right Panel - Sync Controls -->
+            <Border Grid.Column="1" BorderBrush="#BDC3C7" BorderThickness="1" CornerRadius="6" Padding="16" Margin="8,0,0,0">
+                <Grid RowDefinitions="Auto,Auto,*,Auto">
+
+                    <!-- Title -->
+                    <TextBlock Grid.Row="0" Text="Sync Controls" FontSize="18" FontWeight="SemiBold" Margin="0,0,0,12"/>
+
+                    <!-- Cloud Destination -->
+                    <Border Grid.Row="1" Background="#ECF0F1" Padding="12" CornerRadius="6" Margin="0,0,0,16">
+                        <StackPanel Spacing="8">
+                            <TextBlock Text="Cloud Destination" FontWeight="SemiBold" Foreground="#2C3E50"/>
+                            <TextBox Text="{Binding CloudDestinationFolder}" 
+                                     Watermark="SaveSync/Saves"/>
+                            <Button Content="Update Destination" 
+                                    Command="{Binding UpdateCloudFolderCommand}"
+                                    HorizontalAlignment="Stretch"
+                                    Padding="0,6"
+									Foreground="#2C3E50">
+                                <Button.Styles>
+                                    <Style Selector="Button:pointerover /template/ ContentPresenter">
+                                        <Setter Property="Foreground" Value="White"/>
+                                    </Style>
+                                    <Style Selector="Button:pressed /template/ ContentPresenter">
+                                        <Setter Property="Foreground" Value="#ECF0F1"/>
+                                    </Style>
+                                </Button.Styles>
+                            </Button>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Sync Actions -->
+                    <StackPanel Grid.Row="2" Spacing="12">
+                        <Button Content="Sync Selected Game" 
+                                Command="{Binding SyncSelectedGameCommand}"
+                                Background="#27AE60"
+                                Foreground="White"
+                                HorizontalAlignment="Stretch"
+                                Padding="0,12"
+                                FontSize="14"
+                                FontWeight="SemiBold"/>
+
+                        <Button Content="Sync All Games" 
+                                Command="{Binding SyncAllGamesCommand}"
+                                Background="#2980B9"
+                                Foreground="White"
+                                HorizontalAlignment="Stretch"
+                                Padding="0,12"
+                                FontSize="14"
+                                FontWeight="SemiBold"/>
+
+                        <!-- Progress -->
+                        <Border Background="#ECF0F1" 
+                                Padding="12" 
+                                CornerRadius="6"
+                                IsVisible="{Binding IsSyncing}">
+                            <StackPanel Spacing="8">
+                                <TextBlock Text="Syncing..." FontWeight="SemiBold" Foreground="#2C3E50"/>
+                                <ProgressBar Value="{Binding SyncProgress}" 
+                                             Maximum="100"
+                                             Height="8"
+                                             CornerRadius="4"/>
+                                <TextBlock Text="{Binding SyncProgress, StringFormat='{}Progress: {0}%'}" 
+                                           FontSize="11"
+                                           Foreground="#5D6D7E"
+                                           HorizontalAlignment="Center"/>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+
+                    <!-- Info -->
+                    <Border Grid.Row="3" 
+                            Background="#E8F8F5" 
+                            Padding="12" 
+                            CornerRadius="6"
+                            BorderBrush="#27AE60"
+                            BorderThickness="1"
+                            Margin="0,12,0,0">
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="ℹ Quick Start" FontWeight="SemiBold" Foreground="#1E8449"/>
+                            <TextBlock Text="1. Connect Google Drive" FontSize="11" TextWrapping="Wrap" Foreground="#2C3E50"/>
+                            <TextBlock Text="2. Add your games" FontSize="11" TextWrapping="Wrap" Foreground="#2C3E50"/>
+                            <TextBlock Text="3. Click Sync!" FontSize="11" TextWrapping="Wrap" Foreground="#2C3E50"/>
+                        </StackPanel>
+                    </Border>
+                </Grid>
+            </Border>
+        </Grid>
+
+        <!-- Status Bar -->
+        <Border Grid.Row="2" 
+                Background="#34495E" 
+                Padding="12,8" 
+                CornerRadius="6" 
+                Margin="0,16,0,0">
+            <Grid ColumnDefinitions="Auto,*">
+                <TextBlock Grid.Column="0" 
+                           Text="Status: " 
+                           Foreground="#BDC3C7" 
+                           FontWeight="SemiBold"
+                           Margin="0,0,8,0"/>
+                <TextBlock Grid.Column="1" 
+                           Text="{Binding StatusMessage}" 
+                           Foreground="White"/>
+            </Grid>
+        </Border>
+    </Grid>
+</Window>
