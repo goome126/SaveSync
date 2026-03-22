@@ -21,16 +21,22 @@ public partial class MainWindowViewModel : ViewModelBase
     public void SetDialogService(IDialogService dialogService) => _dialogService = dialogService;
 
     [ObservableProperty]
-    private ObservableCollection<Game> _games = new();
+    private ObservableCollection<GameViewModel> _games = new();
 
     [ObservableProperty]
-    private Game? _selectedGame;
+    private GameViewModel? _selectedGame;
 
     [ObservableProperty]
     private string _newGameName = string.Empty;
 
     [ObservableProperty]
     private string _newGameSavePath = string.Empty;
+
+    [ObservableProperty]
+    private int? _newGameIgdbId;
+
+    [ObservableProperty]
+    private string? _newGameIgdbCoverImageId;
 
     [ObservableProperty]
     private string _cloudDestinationFolder = "SaveSync/Saves";
@@ -87,7 +93,7 @@ public partial class MainWindowViewModel : ViewModelBase
         Games.Clear();
         foreach (var game in config.Games)
         {
-            Games.Add(game);
+            Games.Add(new GameViewModel(game));
         }
 
         CloudDestinationFolder = config.CloudDestinationFolder;
@@ -105,10 +111,12 @@ public partial class MainWindowViewModel : ViewModelBase
         var game = new Game
         {
             Name = NewGameName.Trim(),
-            SavePath = NewGameSavePath.Trim()
+            SavePath = NewGameSavePath.Trim(),
+            IgdbId = NewGameIgdbId,
+            IgdbCoverImageId = NewGameIgdbCoverImageId
         };
 
-        Games.Add(game);
+        Games.Add(new GameViewModel(game));
 
         var config = _configService.LoadConfig();
         config.Games.Add(game);
@@ -116,6 +124,8 @@ public partial class MainWindowViewModel : ViewModelBase
 
         NewGameName = string.Empty;
         NewGameSavePath = string.Empty;
+        NewGameIgdbId = null;
+        NewGameIgdbCoverImageId = null;
         StatusMessage = $"Added {game.Name} to library";
     }
 
@@ -134,8 +144,8 @@ public partial class MainWindowViewModel : ViewModelBase
 
         var config = _configService.LoadConfig();
         var removedCount = config.Games.RemoveAll(g =>
-            (!string.IsNullOrWhiteSpace(gameToRemove.Id) && g.Id == gameToRemove.Id) ||
-            (string.IsNullOrWhiteSpace(gameToRemove.Id) && g.Name == gameToRemove.Name && g.SavePath == gameToRemove.SavePath));
+            (!string.IsNullOrWhiteSpace(gameToRemove.Game.Id) && g.Id == gameToRemove.Game.Id) ||
+            (string.IsNullOrWhiteSpace(gameToRemove.Game.Id) && g.Name == gameToRemove.Name && g.SavePath == gameToRemove.SavePath));
 
         _configService.SaveConfig(config);
 
@@ -193,7 +203,7 @@ public partial class MainWindowViewModel : ViewModelBase
         }
 
         StatusMessage = "Checking save directory...";
-        if (!await ConfirmSyncIfLocalEmptyAsync(SelectedGame))
+        if (!await ConfirmSyncIfLocalEmptyAsync(SelectedGame.Game))
         {
             StatusMessage = $"Sync cancelled for {SelectedGame.Name}";
             return;
@@ -206,7 +216,7 @@ public partial class MainWindowViewModel : ViewModelBase
         try
         {
             var progress = new Progress<int>(p => SyncProgress = p);
-            await _syncService.SyncGameAsync(SelectedGame, progress);
+            await _syncService.SyncGameAsync(SelectedGame.Game, progress);
 
             StatusMessage = $"Successfully synced {SelectedGame.Name}";
             SyncProgress = 100;
@@ -250,11 +260,11 @@ public partial class MainWindowViewModel : ViewModelBase
                 var game = Games[i];
                 StatusMessage = $"Checking {game.Name} ({i + 1}/{total})...";
 
-                if (!await ConfirmSyncIfLocalEmptyAsync(game))
+                if (!await ConfirmSyncIfLocalEmptyAsync(game.Game))
                     continue;
 
                 StatusMessage = $"Syncing {game.Name} ({i + 1}/{total})...";
-                await _syncService.SyncGameAsync(game);
+                await _syncService.SyncGameAsync(game.Game);
                 synced++;
                 SyncProgress = (i + 1) * 100 / total;
             }
@@ -334,7 +344,7 @@ public partial class MainWindowViewModel : ViewModelBase
         try
         {
             var progress = new Progress<int>(p => SyncProgress = p);
-            await _syncService.RestoreGameAsync(SelectedGame, progress);
+            await _syncService.RestoreGameAsync(SelectedGame.Game, progress);
 
             StatusMessage = $"Successfully restored {SelectedGame.Name}";
             SyncProgress = 100;

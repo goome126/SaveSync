@@ -365,3 +365,6 @@ FodyWeavers.xsd
 # Credential related files
 credentials.json
 token.json
+
+# MacOS specific files
+.DS_Store
