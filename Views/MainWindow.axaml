@@ -1,6 +1,7 @@
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:vm="using:SaveSync.ViewModels"
+        xmlns:converters="using:SaveSync.Converters"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d" d:DesignWidth="1000" d:DesignHeight="650"
@@ -97,7 +98,7 @@
                                         <TextBlock Text="{Binding SavePath}" FontSize="11" Foreground="#7F8C8D" TextWrapping="Wrap"/>
                                         <TextBlock FontSize="11" Foreground="#5D6D7E">
                                             <Run Text="Last synced: "/>
-                                            <Run Text="{Binding LastSynced, StringFormat='{}{0:g}', FallbackValue='Never'}"/>
+                                            <Run Text="{Binding LastSynced, Converter={x:Static converters:DateTimeToSyncStringConverter.Instance}, Mode=OneWay}"/>
                                         </TextBlock>
                                     </StackPanel>
                                 </Border>
